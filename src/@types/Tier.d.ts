@@ -15,3 +15,10 @@ export type TierList = {
   tiers: TierRow[];
   elements: TierElement[];
 };
+
+export type TierListWithId = TierList & {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};

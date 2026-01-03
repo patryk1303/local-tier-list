@@ -1,21 +1,37 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
+
 import Row from '@/layout/Row.vue';
 import Container from '@/layout/Container.vue';
+import { $tierRows, updateTierList } from '@/stores/tier.store';
 
 import TierRow from './TierRow.vue';
 
-const tiers = ref([
-  { tier: 'S', backgroundColor: '#ccaa00' },
-  { tier: 'A', backgroundColor: 'aqua' },
-  { tier: 'B', backgroundColor: 'rgb(213, 0, 190)' },
-  { tier: 'C', backgroundColor: 'rebeccapurple' },
-  { tier: 'D', backgroundColor: 'tomato' },
-]);
+import type { TierListWithId, TierRow as TTierRow } from '@/@types/Tier';
 
-const onEnd = (event: any) => {
-  console.log(event, tiers.value);
+const props = defineProps<{
+  tier: TierListWithId;
+}>();
+
+const tierRows = ref<TTierRow[]>(props.tier.tiers);
+
+// $tierRows.subscribe((newTiers) => {
+//   tiers.value = newTiers as TTierRow[];
+// });
+
+// watch(tierRows, async (newTiers) => {
+
+// });
+
+const onEnd = async (event: any) => {
+  console.log(event, tierRows.value);
+  await updateTierList(props.tier.id, {
+    // TODO update elements too - after implementing element store
+    elements: [...props.tier.elements],
+    tiers: [...tierRows.value],
+    name: props.tier.name,
+  });
 };
 </script>
 
@@ -24,7 +40,7 @@ const onEnd = (event: any) => {
     <Container>
       <VueDraggable
         ref="draggable"
-        v-model="tiers"
+        v-model="tierRows"
         handle=".tier-row-draggable"
         ghostClass="tier-ghost"
         chosenClass="tier-chosen"
@@ -33,7 +49,7 @@ const onEnd = (event: any) => {
         @end="onEnd"
       >
         <TierRow
-          v-for="tier in tiers"
+          v-for="tier in tierRows"
           :key="tier.tier"
           :tier="tier.tier"
           :backgroundColor="tier.backgroundColor"
